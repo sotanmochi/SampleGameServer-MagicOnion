@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Grpc.Core;
+using MagicOnion;
 using MagicOnion.Client;
 using GameServer.Shared;
 using GameServer.Shared.Services;
@@ -11,9 +12,9 @@ namespace GameServer.UnityClient
     {
         IWorldService _service;
 
-        public WorldServiceClient(ChannelBase channel)
+        public WorldServiceClient(Uri uri)
         {
-            _service = MagicOnionClient.Create<IWorldService>(channel);
+            _service = MagicOnionClient.Create<IWorldService>(GrpcChannelx.ForAddress(uri));
         }
 
         public async Task<List<string>> FindWorldIdOrderByRank()

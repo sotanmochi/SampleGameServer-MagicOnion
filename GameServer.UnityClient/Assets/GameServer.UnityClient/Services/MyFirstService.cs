@@ -1,5 +1,6 @@
+using System;
 using System.Threading.Tasks;
-using Grpc.Core;
+using MagicOnion;
 using MagicOnion.Client;
 using GameServer.Shared.Services;
 
@@ -9,9 +10,9 @@ namespace GameServer.UnityClient
     {
         IMyFirstService _service;
 
-        public MyFirstService(ChannelBase channel)
+        public MyFirstService(Uri uri)
         {
-            _service = MagicOnionClient.Create<IMyFirstService>(channel);
+            _service = MagicOnionClient.Create<IMyFirstService>(GrpcChannelx.ForAddress(uri));
         }
 
         public async Task<int> SumAsync(int x, int y)
