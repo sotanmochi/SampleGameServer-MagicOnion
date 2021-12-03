@@ -25,6 +25,14 @@ namespace GameServer
         {
             services.AddGrpc(); // MagicOnion depends on ASP.NET Core gRPC service.
             services.AddMagicOnion();
+
+            services.AddRedisRepository(options => 
+            {
+                options.ConnectionMultiplexer = StackExchange.Redis.ConnectionMultiplexer.Connect("localhost");
+                options.Db = 1;
+            });
+            services.AddRedisSetRepository<string>();
+            services.AddRedisValueRepository<GameServer.Shared.World>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
