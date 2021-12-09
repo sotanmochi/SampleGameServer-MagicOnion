@@ -4,7 +4,7 @@ using GameServer.UnityClient;
 
 namespace SampleGame.Application
 {
-    public class Main : MonoBehaviour
+    public class ServiceTest : MonoBehaviour
     {
         async void Start()
         {

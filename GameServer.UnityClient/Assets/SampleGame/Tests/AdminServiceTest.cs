@@ -6,7 +6,7 @@ using GameServer.UnityClient.Admin;
 
 namespace SampleGame.Application
 {
-    public class AdminMain : MonoBehaviour
+    public class AdminServiceTest : MonoBehaviour
     {
         async void Start()
         {
