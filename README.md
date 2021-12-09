@@ -25,12 +25,20 @@ The following assets are included in this project.
 ## Dependencies
 
 - [StackExchange.Redis 2.2.88](https://github.com/StackExchange/StackExchange.Redis)  
-  Licensed under the MIT License.  
+  This library is licensed under the MIT License.  
   Copyright (c) 2014 Stack Exchange  
 
 - [Utf8Json 1.3.7](https://github.com/neuecc/Utf8Json)  
-  Licensed under the MIT License.  
+  This library is licensed under the MIT License.  
   Copyright (c) 2017 Yoshifumi Kawai  
+
+- [UniRx Ver.7.1.0](https://github.com/neuecc/UniRx/releases/tag/7.1.0)  
+  This library is licensed under the MIT License.  
+  Copyright (c) 2018 Yoshifumi Kawai
+
+- [UniTask Ver.2.2.5](https://github.com/Cysharp/UniTask/releases/tag/2.2.5)  
+  This library is licensed under the MIT License.  
+  Copyright (c) 2019 Yoshifumi Kawai / Cysharp, Inc.
 
 ## License
 このプロジェクトは、サードパーティのアセットを除き、[CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.ja) (Public Domain) でライセンスされています。  

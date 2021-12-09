@@ -22,6 +22,16 @@ The following assets are included in this project.
   This library is licensed under the MIT License.  
   Copyright (c) .NET Foundation and Contributors.  
 
+## Dependencies
+
+- [UniRx Ver.7.1.0](https://github.com/neuecc/UniRx/releases/tag/7.1.0)  
+  This library is licensed under the MIT License.  
+  Copyright (c) 2018 Yoshifumi Kawai  
+
+- [UniTask Ver.2.2.5](https://github.com/Cysharp/UniTask/releases/tag/2.2.5)  
+  This library is licensed under the MIT License.  
+  Copyright (c) 2019 Yoshifumi Kawai / Cysharp, Inc.  
+
 ## License
 このプロジェクトは、サードパーティのアセットを除き、[CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.ja) (Public Domain) でライセンスされています。  
 This project is licensed under [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en) (Public Domain) except for third party assets.  
