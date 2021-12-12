@@ -16,8 +16,8 @@ namespace SampleGame.Application
 
         private async UniTask LoadScenesAsync()
         {
-            // await SceneManager.LoadSceneAsync("System", LoadSceneMode.Additive);
-            // await SceneManager.LoadSceneAsync("ChatScreen", LoadSceneMode.Additive);
+            await SceneManager.LoadSceneAsync("System", LoadSceneMode.Additive);
+            await SceneManager.LoadSceneAsync("ChatScreen", LoadSceneMode.Additive);
         }
     }
 }
