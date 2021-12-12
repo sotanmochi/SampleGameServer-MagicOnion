@@ -8,4 +8,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/SampleGame/Scenes/Main.unity
     guid: a818369e1eba016448c2823c99b99e0b
+  - enabled: 1
+    path: Assets/SampleGame/Scenes/System.unity
+    guid: 6650ab4f4bcecc740bd3fe2a147dfa36
+  - enabled: 1
+    path: Assets/SampleGame/Scenes/Presentation/ChatScreen.unity
+    guid: 599cb2b41055e644f8a56644a754825f
   m_configObjects: {}
