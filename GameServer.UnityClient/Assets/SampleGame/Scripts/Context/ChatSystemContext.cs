@@ -50,8 +50,17 @@ namespace SampleGame.Context
 
         public async UniTask<bool> Connect()
         {
-            // DebugLogger.Log($"[ChatSystemContext] Connect | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+            // Multithreading. Run on ThreadPool after this switching. 
+            await UniTask.SwitchToThreadPool();
+            DebugLogger.Log($"<color=orange>[ChatSystemContext] Start of Connect | Thread Id: {Thread.CurrentThread.ManagedThreadId}</color>");
+
+            // Work on ThreadPool. 
             _connected = await _streamingClient.ConnectAsync(_channel);
+
+            // Return to MainThread (same as `ObserveOnMainThread` in UniRx). 
+            await UniTask.SwitchToMainThread();
+            DebugLogger.Log($"<color=orange>[ChatSystemContext] End of Connect | Thread Id: {Thread.CurrentThread.ManagedThreadId}</color>");
+
             return _connected;
         }
 

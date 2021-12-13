@@ -33,9 +33,10 @@ namespace SampleGame.Presenter
                 .AddTo(_disposable);
 
             _context.OnReceiveMessage
+                .ObserveOnMainThread()
                 .Subscribe(data => 
                 {
-                    // DebugLogger.Log($"[ChatPresenter] OnReceiveMessage | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+                    DebugLogger.Log($"[ChatPresenter] OnReceiveMessage | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
                     if (string.IsNullOrEmpty(data.Username))
                     {
                         _uiView.AppendMessage($"{data.Message}");

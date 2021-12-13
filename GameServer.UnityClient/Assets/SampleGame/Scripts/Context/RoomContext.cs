@@ -1,4 +1,6 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
+using SampleGame.Utility;
 
 namespace SampleGame.Context
 {
@@ -13,6 +15,7 @@ namespace SampleGame.Context
 
         public async UniTask<bool> Initialize()
         {
+            DebugLogger.Log($"[RoomContext] Initialize | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
             return await _chatSystemContext.Connect();
         }
 

@@ -53,7 +53,7 @@ namespace GameServer.UnityClient
 
         protected override async Task ConnectClientAsync()
         {
-            DebugLogger.Log($"[ChatStreamingClient] ConnectClientAsync");
+            DebugLogger.Log($"<color=orange>[ChatStreamingClient] ConnectClientAsync | Thread Id: {Thread.CurrentThread.ManagedThreadId}</color>");
             _streamingClient = await StreamingHubClient.ConnectAsync<IChatHub, IChatHubReceiver>(_channel, this, 
                                                         cancellationToken: _shutdownCancellation.Token);
         }
