@@ -18,7 +18,7 @@ namespace SampleGame.Application
         public Vector3 Position; // 12[Bytes]
 
         [Key(2)]
-        public Quaternion RotationAngles; // 16[Bytes]
+        public Quaternion Rotation; // 16[Bytes]
     }
 
     [MessagePackObject]
@@ -32,7 +32,7 @@ namespace SampleGame.Application
         public Vector3 Position; // 12[Bytes]
 
         [Key(2)]
-        public Quaternion RotationAngles; // 16[Bytes]
+        public Quaternion Rotation; // 16[Bytes]
     }
 
     [MessagePackObject]
@@ -45,7 +45,7 @@ namespace SampleGame.Application
         public Vector3 Position;
 
         [Key(2)]
-        public Quaternion RotationAngles;
+        public Quaternion Rotation;
     }
 
     public class SerializeTest : MonoBehaviour
