@@ -3,7 +3,7 @@ using MessagePack;
 namespace GameServer.Shared.MessagePackObject
 {
     [MessagePackObject]
-    public struct MessageResponse
+    public class MessageResponse
     {
         [Key(0)]
         public string Username { get; set; }

@@ -47,7 +47,7 @@ namespace GameServer.UnityClient
                 return;
             }
 
-            DebugLogger.Log($"[ChatStreamingClient] SendMesage");
+            DebugLogger.Log($"[ChatStreamingClient] SendMessage | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
             _streamingClient.SendMessageAsync(message);
         }
 

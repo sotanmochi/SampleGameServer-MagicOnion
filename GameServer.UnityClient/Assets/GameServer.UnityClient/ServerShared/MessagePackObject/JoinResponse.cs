@@ -3,13 +3,13 @@ using MessagePack;
 namespace GameServer.Shared.MessagePackObject
 {
     [MessagePackObject]
-    public struct JoinResponse
+    public class JoinResponse
     {
         [Key(0)]
-        public uint ClientNumber { get; set; }
+        public int ClientId { get; set; }
 
         [Key(1)]
-        public string ClientConnectionId { get; set; }
+        public string ConnectionId { get; set; }
 
         [Key(2)]
         public string RoomId { get; set; }

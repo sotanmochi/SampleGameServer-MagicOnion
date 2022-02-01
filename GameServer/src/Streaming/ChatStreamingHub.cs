@@ -14,48 +14,76 @@ namespace GameServer.Streaming
     {
         private IGroup _room;
         private string _username;
-        private int _clientNumber;
+        private int _clientId = -1;
 
         public async Task JoinAsync(JoinRequest request)
         {
-            Console.WriteLine($"[ChatStreamingHub] JoinAsync | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+            if (_clientId >= 0 && request.RoomId == _room?.GroupName) { return; }
+
+            // Console.WriteLine($"[ChatStreamingHub] JoinAsync | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+
+            ClientIdPoolStorage.CreateOrGetPool(request.RoomId, 10);
+
+            var newClientId = ClientIdPoolStorage.GetClientId(request.RoomId);
+            // Console.WriteLine($"[ChatStreamingHub] JoinAsync | ClientId: {newClientId}");
+            if (newClientId < 0)
+            {
+                var failedResponse = new JoinResponse()
+                {
+                    ClientId = _clientId,
+                    ConnectionId = Context.ContextId.ToString(),
+                    RoomId = request.RoomId,
+                    Username = request.Username,
+                };
+
+                _room = await Group.AddAsync(request.RoomId);
+                BroadcastToSelf(_room).OnLeave(failedResponse);
+                await _room.RemoveAsync(Context);
+
+                return;
+            }
 
             _room = await Group.AddAsync(request.RoomId);
             _username = request.Username;
-            _clientNumber = await _room.GetMemberCountAsync();
+            _clientId = newClientId;
 
-            Console.WriteLine($"[ChatStreamingHub] JoinAsync | Room: {_room.GroupName}, Username: {_username}, Context Id: {Context.ContextId})");
-            Console.WriteLine($"[ChatStreamingHub] JoinAsync | Member count: {_clientNumber}");
+            // Console.WriteLine($"[ChatStreamingHub] JoinAsync | Room: {_room.GroupName}, ClientId: {_clientId}, Username: {_username}, ContextId: {Context.ContextId})");
 
-            var response = new JoinResponse()
+            var successResponse = new JoinResponse()
             {
-                ClientNumber = (uint)_clientNumber,
-                ClientConnectionId = Context.ContextId.ToString(),
+                ClientId = _clientId,
+                ConnectionId = Context.ContextId.ToString(),
                 RoomId = _room.GroupName,
                 Username = _username,
             };
 
-            BroadcastToSelf(_room).OnJoin(response);
-            BroadcastExceptSelf(_room).OnUserJoin(response);
+            // Console.WriteLine($"[ChatStreamingHub] Join success: {_clientId}");
+
+            BroadcastToSelf(_room).OnJoin(successResponse);
+            BroadcastExceptSelf(_room).OnUserJoin(successResponse);
         }
 
         public async Task LeaveAsync()
         {
-            Console.WriteLine($"[ChatStreamingHub] LeaveAsync | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            Console.WriteLine($"[ChatStreamingHub] LeaveAsync | Room: {_room.GroupName}, No: {_clientNumber}, Username: {_username}, Context Id: {Context.ContextId})");
+            if (_clientId < 0) { return; }
 
-            await _room.RemoveAsync(Context);
-
-            var memberCount = await _room.GetMemberCountAsync();
-            Console.WriteLine($"[ChatStreamingHub] LeaveAsync | Member count: {memberCount}");
+            // Console.WriteLine($"[ChatStreamingHub] LeaveAsync | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+            // Console.WriteLine($"[ChatStreamingHub] LeaveAsync | Room: {_room.GroupName}, No: {_clientId}, Username: {_username}, Context Id: {Context.ContextId})");
 
             var response = new JoinResponse()
             {
-                ClientNumber = (uint)_clientNumber,
-                ClientConnectionId = Context.ContextId.ToString(),
+                ClientId = _clientId,
+                ConnectionId = Context.ContextId.ToString(),
                 RoomId = _room.GroupName,
                 Username = _username,
             };
+
+            await _room.RemoveAsync(Context);
+            ClientIdPoolStorage.ReturnToPool(_room.GroupName, (ushort)_clientId);
+            _clientId = -1;
+
+            // var memberCount = await _room.GetMemberCountAsync();
+            // Console.WriteLine($"[ChatStreamingHub] LeaveAsync | Member count: {memberCount}");
 
             BroadcastToSelf(_room).OnLeave(response);
             BroadcastExceptSelf(_room).OnUserLeave(response);
@@ -63,7 +91,9 @@ namespace GameServer.Streaming
 
         public async Task SendMessageAsync(string message)
         {
-            Console.WriteLine($"[ChatStreaming.SendMessage] Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+            if (_clientId < 0) { return; }
+
+            // Console.WriteLine($"[ChatStreaming.SendMessage] Thread Id: {Thread.CurrentThread.ManagedThreadId}");
 
             var response = new MessageResponse()
             {
@@ -91,15 +121,20 @@ namespace GameServer.Streaming
         /// <returns></returns>
         protected override ValueTask OnDisconnected()
         {
-            Console.WriteLine($"[ChatStreamingHub] OnDisconnected | Room: {_room.GroupName}, No: {_clientNumber}, Username: {_username}, Context Id: {Context.ContextId})");
+            if (_clientId < 0) { return CompletedTask; }
+
+            // Console.WriteLine($"[ChatStreamingHub] OnDisconnected | Room: {_room.GroupName}, ClientId: {_clientId}, Username: {_username}, ContextId: {Context.ContextId})");
 
             var response = new JoinResponse()
             {
-                ClientNumber = (uint)_clientNumber,
-                ClientConnectionId = Context.ContextId.ToString(),
+                ClientId = _clientId,
+                ConnectionId = Context.ContextId.ToString(),
                 RoomId = _room.GroupName,
                 Username = _username,
             };
+
+            ClientIdPoolStorage.ReturnToPool(_room.GroupName, (ushort)_clientId);
+            _clientId = -1;
 
             BroadcastExceptSelf(_room).OnUserLeave(response);
 

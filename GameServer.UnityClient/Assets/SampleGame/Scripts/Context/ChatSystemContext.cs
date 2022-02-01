@@ -86,6 +86,7 @@ namespace SampleGame.Context
 
         public void SendMessage(string message)
         {
+            DebugLogger.Log($"[ChatSystemContext] SendMessage | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
             _streamingClient.SendMessage(message);
         }
 
