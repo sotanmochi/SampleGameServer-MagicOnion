@@ -100,7 +100,6 @@ namespace SampleGame.Gateway
             OnJoin?.Invoke(new JoinResult()
             {
                 ClientId = joinResponse.ClientId,
-                ConnectionId = joinResponse.ConnectionId,
                 RoomId = joinResponse.RoomId,
                 Username = joinResponse.Username,
             });
@@ -115,7 +114,6 @@ namespace SampleGame.Gateway
             OnLeave?.Invoke(new JoinResult()
             {
                 ClientId = joinResponse.ClientId,
-                ConnectionId = joinResponse.ConnectionId,
                 RoomId = joinResponse.RoomId,
                 Username = joinResponse.Username,
             });
@@ -128,7 +126,6 @@ namespace SampleGame.Gateway
             OnUserJoin?.Invoke(new JoinResult()
             {
                 ClientId = joinResponse.ClientId,
-                ConnectionId = joinResponse.ConnectionId,
                 RoomId = joinResponse.RoomId,
                 Username = joinResponse.Username,
             });
@@ -141,7 +138,6 @@ namespace SampleGame.Gateway
             OnUserLeave?.Invoke(new JoinResult()
             {
                 ClientId = joinResponse.ClientId,
-                ConnectionId = joinResponse.ConnectionId,
                 RoomId = joinResponse.RoomId,
                 Username = joinResponse.Username,
             });
