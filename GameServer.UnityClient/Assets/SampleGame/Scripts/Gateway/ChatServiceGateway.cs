@@ -6,7 +6,6 @@ using MagicOnion;
 using GameServer.Shared.MessagePackObject;
 using GameServer.UnityClient;
 using SampleGame.Domain.Chat;
-using SampleGame.Domain.Network;
 
 namespace SampleGame.Gateway
 {

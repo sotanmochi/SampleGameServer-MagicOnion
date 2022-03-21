@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using SampleGame.Domain.Chat;
-using SampleGame.Domain.Network;
 using SampleGame.Gateway;
 using SampleGame.Utility;
 

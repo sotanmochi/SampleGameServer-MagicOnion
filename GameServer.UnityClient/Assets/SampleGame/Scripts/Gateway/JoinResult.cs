@@ -1,4 +1,4 @@
-namespace SampleGame.Domain.Network
+namespace SampleGame.Gateway
 {
     public class JoinResult
     {

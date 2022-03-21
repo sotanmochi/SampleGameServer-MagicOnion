@@ -6,7 +6,6 @@ using Grpc.Core;
 using MagicOnion;
 using GameServer.UnityClient;
 using GameServer.Shared.MessagePackObject;
-using SampleGame.Domain.Network;
 
 namespace SampleGame.Gateway
 {
