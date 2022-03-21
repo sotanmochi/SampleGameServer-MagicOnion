@@ -4,7 +4,7 @@ using UnityEngine;
 namespace GameServer.Shared.MessagePackObject
 {
     [MessagePackObject]
-    public struct PlayerState
+    public class PlayerPose
     {
         [Key(0)]
         public ushort PlayerId;
@@ -13,6 +13,6 @@ namespace GameServer.Shared.MessagePackObject
         public Vector3 Position;
 
         [Key(2)]
-        public Vector3 RotationAngles;
+        public Quaternion Rotation;
     }
 }
