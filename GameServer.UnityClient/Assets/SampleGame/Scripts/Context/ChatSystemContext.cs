@@ -1,126 +1,116 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Grpc.Core;
-using MagicOnion;
 using UniRx;
-using GameServer.UnityClient;
+using SampleGame.Domain.Chat;
+using SampleGame.Domain.Network;
+using SampleGame.Gateway;
+using SampleGame.Utility;
 
 namespace SampleGame.Context
 {
     public sealed class ChatSystemContext
     {
-        public IObservable<(string Username, string Message)> OnReceiveMessage => _receiveMessageSubject;
-        private readonly Subject<(string Username, string Message)> _receiveMessageSubject = new Subject<(string Username, string Message)>();
-
-        private readonly ChatStreamingClient _streamingClient;
-        private readonly ChannelBase _channel;
-
-        private bool _connected;
-        private bool _joined;
+        public IObservable<ChatMessage> OnReceiveMessage => _receiveMessageSubject;
+        private readonly Subject<ChatMessage> _receiveMessageSubject = new Subject<ChatMessage>();
 
         private string _username;
 
-        public ChatSystemContext(string address = "http://localhost:5000")
+        private readonly ChatServiceGateway _chatService;
+
+        public ChatSystemContext(ChatServiceGateway chatService)
         {
-            _streamingClient = new ChatStreamingClient();
-            _channel = GrpcChannelx.ForAddress(address);
+            _chatService = chatService;
         }
 
         public void Initialize()
         {
-            _streamingClient.OnJoin += OnJoinEventHandler;
-            _streamingClient.OnLeave += OnLeaveEventHandler;
-            _streamingClient.OnUserJoin += OnUserJoinEventHandler;
-            _streamingClient.OnUserLeave += OnUserLeaveEventHandler;
-            _streamingClient.OnReceiveMessage += OnReceiveMessageEventHandler;           
-            _streamingClient.Initialize();
+            _chatService.OnJoin += OnJoinEventHandler;
+            _chatService.OnLeave += OnLeaveEventHandler;
+            _chatService.OnUserJoin += OnUserJoinEventHandler;
+            _chatService.OnUserLeave += OnUserLeaveEventHandler;
+            _chatService.OnReceiveMessage += OnReceiveMessageEventHandler;           
+            _chatService.Initialize();
         }
 
         public async UniTask Dispose()
         {
             _receiveMessageSubject.Dispose();
-            _streamingClient.OnJoin -= OnJoinEventHandler;
-            _streamingClient.OnLeave -= OnLeaveEventHandler;
-            _streamingClient.OnUserJoin -= OnUserJoinEventHandler;
-            _streamingClient.OnUserLeave -= OnUserLeaveEventHandler;
-            _streamingClient.OnReceiveMessage -= OnReceiveMessageEventHandler;
-            await _streamingClient.DisposeAsync();
+            _chatService.OnJoin -= OnJoinEventHandler;
+            _chatService.OnLeave -= OnLeaveEventHandler;
+            _chatService.OnUserJoin -= OnUserJoinEventHandler;
+            _chatService.OnUserLeave -= OnUserLeaveEventHandler;
+            _chatService.OnReceiveMessage -= OnReceiveMessageEventHandler;
+            await _chatService.Dispose();
         }
 
         public async UniTask<bool> Connect()
         {
-            // Multithreading. Run on ThreadPool after this switching. 
-            await UniTask.SwitchToThreadPool();
-            DebugLogger.Log($"<color=orange>[ChatSystemContext] Start of Connect | Thread Id: {Thread.CurrentThread.ManagedThreadId}</color>");
-
-            // Work on ThreadPool. 
-            _connected = await _streamingClient.ConnectAsync(_channel);
-
-            // Return to MainThread (same as `ObserveOnMainThread` in UniRx). 
-            await UniTask.SwitchToMainThread();
-            DebugLogger.Log($"<color=orange>[ChatSystemContext] End of Connect | Thread Id: {Thread.CurrentThread.ManagedThreadId}</color>");
-
-            return _connected;
+            return await _chatService.Connect();
         }
 
         public async UniTask Disconnect()
         {
-            _connected = false;
-            await _streamingClient.Leave();
-            await _streamingClient.DisconnectAsync();
+            await _chatService.Disconnect();
         }
 
         public async UniTask<bool> Join(string roomId, string username)
         {
-            // DebugLogger.Log($"[ChatSystemContext] Join | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            await _streamingClient.Join(roomId, username);
-            await UniTask.WaitUntil(() => _joined); // ToDo: Cancellation
-            return _joined;
+            return await _chatService.Join(roomId, username);
         }
 
         public async UniTask Leave()
         {
-            await _streamingClient.Leave();
+            await _chatService.Leave();
         }
 
         public void SendMessage(string message)
         {
             DebugLogger.Log($"[ChatSystemContext] SendMessage | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            _streamingClient.SendMessage(message);
+            _chatService.SendMessage(message);
         }
 
-        private void OnReceiveMessageEventHandler((string username, string message) data)
+        private void OnReceiveMessageEventHandler(ChatMessage message)
         {
             // DebugLogger.Log($"[ChatSystemContext] OnReceiveMessageEventHandler | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            _receiveMessageSubject.OnNext(data);
+            _receiveMessageSubject.OnNext(message);
         }
 
-        private void OnJoinEventHandler((string RoomId, string Username) data)
+        private void OnJoinEventHandler(JoinResult joinResult)
         {
             // DebugLogger.Log($"[ChatSystemContext] OnJoinEventHandler | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            _joined = true;
-            _username = data.Username;
-            _receiveMessageSubject.OnNext(("", $"{_username} has been joined."));
+            _username = joinResult.Username;
+            _receiveMessageSubject.OnNext(new ChatMessage()
+            { 
+                Message = $"{_username} has been joined.",
+            });
         }
 
-        private void OnLeaveEventHandler((string RoomId, string Username) data)
+        private void OnLeaveEventHandler(JoinResult joinResult)
         {
             // DebugLogger.Log($"[ChatSystemContext] OnLeaveEventHandler | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            _joined = false;
-            _receiveMessageSubject.OnNext(("", $"{_username} has been joined."));
+            _receiveMessageSubject.OnNext(new ChatMessage()
+            { 
+                Message = $"{_username} has been left the room.",
+            });
         }
 
-        private void OnUserJoinEventHandler((string RoomId, string Username) data)
+        private void OnUserJoinEventHandler(JoinResult joinResult)
         {
             // DebugLogger.Log($"[ChatSystemContext] OnUserJoinEventHandler | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            _receiveMessageSubject.OnNext(("", $"{data.Username} has been joined."));
+            _receiveMessageSubject.OnNext(new ChatMessage()
+            {
+                Message = $"{joinResult.Username} has been joined.",
+            });
         }
 
-        private void OnUserLeaveEventHandler((string RoomId, string Username) data)
+        private void OnUserLeaveEventHandler(JoinResult joinResult)
         {
             // DebugLogger.Log($"[ChatSystemContext] OnUserLeaveEventHandler | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            _receiveMessageSubject.OnNext(("", $"{data.Username} has been left the room."));
+            _receiveMessageSubject.OnNext(new ChatMessage()
+            {
+                Message = $"{joinResult.Username} has been left the room."
+            });
         }
     }
 }

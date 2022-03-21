@@ -9,11 +9,11 @@ namespace GameServer.UnityClient
 {
     public sealed class ChatStreamingClient : StreamingClientBase<IChatHub, IChatHubReceiver>, IChatHubReceiver
     {
-        public event Action<(string RoomId, string Username)> OnJoin;
-        public event Action<(string RoomId, string Username)> OnLeave;
-        public event Action<(string RoomId, string Username)> OnUserJoin;
-        public event Action<(string RoomId, string Username)> OnUserLeave;
-        public event Action<(string Username, string Message)> OnReceiveMessage;
+        public event Action<JoinResponse> OnJoin;
+        public event Action<JoinResponse> OnLeave;
+        public event Action<JoinResponse> OnUserJoin;
+        public event Action<JoinResponse> OnUserLeave;
+        public event Action<MessageResponse> OnReceiveMessage;
 
         public async Task Join(string roomId, string username)
         {
@@ -61,33 +61,33 @@ namespace GameServer.UnityClient
         void IChatHubReceiver.OnReceiveMessage(MessageResponse message)
         {
             DebugLogger.Log($"[ChatStreamingClient] OnReceiveMessage | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            OnReceiveMessage?.Invoke((message.Username, message.Message));
+            OnReceiveMessage?.Invoke(message);
         }
 
         void IChatHubReceiver.OnJoin(JoinResponse response)
         {
             DebugLogger.Log($"[ChatStreamingClient] OnJoin | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            OnJoin?.Invoke((response.RoomId, response.Username));
+            OnJoin?.Invoke(response);
         }
 
         void IChatHubReceiver.OnLeave(JoinResponse response)
         {
             DebugLogger.Log($"[ChatStreamingClient] OnLeave | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            OnLeave?.Invoke((response.RoomId, response.Username));
+            OnLeave?.Invoke(response);
         }
 
         void IChatHubReceiver.OnUserJoin(JoinResponse response)
         {
             DebugLogger.Log($"[ChatStreamingClient] OnUserJoin | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
             DebugLogger.Log($"[ChatStreamingClient] OnUserJoin | Username: {response.Username}");
-            OnUserJoin?.Invoke((response.RoomId, response.Username));
+            OnUserJoin?.Invoke(response);
         }
 
         void IChatHubReceiver.OnUserLeave(JoinResponse response)
         {
             DebugLogger.Log($"[ChatStreamingClient] OnUserLeave | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
             DebugLogger.Log($"[ChatStreamingClient] OnUserLeave | Username: {response.Username}");
-            OnUserLeave?.Invoke((response.RoomId, response.Username));
+            OnUserLeave?.Invoke(response);
         }
     }
 }
