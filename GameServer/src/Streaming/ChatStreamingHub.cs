@@ -22,9 +22,10 @@ namespace GameServer.Streaming
 
             // Console.WriteLine($"[ChatStreamingHub] JoinAsync | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
 
-            ClientIdPoolStorage.CreateOrGetPool(request.RoomId, 10);
+            var roomId = $"ChatStreaming_{request.RoomId}";
+            ClientIdPoolStorage.CreateOrGetPool(roomId, 10);
 
-            var newClientId = ClientIdPoolStorage.GetClientId(request.RoomId);
+            var newClientId = ClientIdPoolStorage.GetClientId(roomId);
             // Console.WriteLine($"[ChatStreamingHub] JoinAsync | ClientId: {newClientId}");
             if (newClientId < 0)
             {
@@ -32,11 +33,11 @@ namespace GameServer.Streaming
                 {
                     ClientId = _clientId,
                     ConnectionId = Context.ContextId.ToString(),
-                    RoomId = request.RoomId,
+                    RoomId = roomId,
                     Username = request.Username,
                 };
 
-                _room = await Group.AddAsync(request.RoomId);
+                _room = await Group.AddAsync(roomId);
                 BroadcastToSelf(_room).OnLeave(failedResponse);
                 await _room.RemoveAsync(Context);
 
