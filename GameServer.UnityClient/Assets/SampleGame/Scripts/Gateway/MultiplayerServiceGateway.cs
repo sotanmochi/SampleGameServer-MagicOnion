@@ -10,7 +10,7 @@ using SampleGame.Domain.Network;
 
 namespace SampleGame.Gateway
 {
-    public sealed class MultiplayerServiceGateway : IDisposable
+    public sealed class MultiplayerServiceGateway
     {
         // public event Action<PlayerPose> OnReceivePlayerPose;
 
@@ -19,35 +19,50 @@ namespace SampleGame.Gateway
         public event Action<JoinResult> OnUserJoin;
         public event Action<JoinResult> OnUserLeave;
 
+        private bool _initialized;
         private bool _connected;
         private bool _joined;
 
         private readonly GameStreamingClient _streamingClient;
         private readonly ChannelBase _channel;
 
-        public MultiplayerServiceGateway(GameStreamingClient streamingClient, string address = "http://localhost:5000")
+        public MultiplayerServiceGateway(string address = "http://localhost:5000")
         {
-            _streamingClient = streamingClient;
+            _streamingClient = new GameStreamingClient();
             _channel = GrpcChannelx.ForAddress(address);
             Initialize();
         }
 
         public void Initialize()
         {
+            if (_initialized)
+            {
+                DebugLogger.LogWarning($"[{nameof(ChatServiceGateway)}] Already initialized");
+                return;
+            }
+
             _streamingClient.OnReceivePlayerPose += OnReceivePlayerPoseEventHandler;
             _streamingClient.OnJoin += OnJoinEventHandler;
             _streamingClient.OnLeave += OnLeaveEventHandler;
             _streamingClient.OnUserJoin += OnUserJoinEventHandler;
             _streamingClient.OnUserLeave += OnUserLeaveEventHandler;
+
+            _streamingClient.Initialize();
+
+            _initialized = true;
         }
 
-        public void Dispose()
+        public async UniTask Dispose()
         {
+            _initialized = false;
+
             _streamingClient.OnReceivePlayerPose -= OnReceivePlayerPoseEventHandler;
             _streamingClient.OnJoin -= OnJoinEventHandler;
             _streamingClient.OnLeave -= OnLeaveEventHandler;
             _streamingClient.OnUserJoin -= OnUserJoinEventHandler;
             _streamingClient.OnUserLeave -= OnUserLeaveEventHandler;
+
+            await _streamingClient.DisposeAsync();
         }
 
         public async UniTask<bool> Connect()
@@ -76,6 +91,7 @@ namespace SampleGame.Gateway
         public async UniTask<bool> Join(string roomId, string username)
         {
             // DebugLogger.Log($"[{nameof(MultiplayerServiceGateway)}] Join | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+            if (!_connected) { await Connect(); }
             await _streamingClient.Join(roomId, username);
             await UniTask.WaitUntil(() => _joined); // ToDo: Cancellation
             return _joined;

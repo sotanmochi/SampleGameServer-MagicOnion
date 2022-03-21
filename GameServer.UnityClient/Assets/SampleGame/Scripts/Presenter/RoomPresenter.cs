@@ -10,12 +10,12 @@ namespace SampleGame.Presenter
     public sealed class RoomPresenter
     {
         private RoomUIView _uiView;
-        private RoomContext _context;
+        private NetworkServiceContext _context;
 
         private bool _initialized;
         private readonly CompositeDisposable _disposable = new CompositeDisposable();
 
-        public RoomPresenter(RoomUIView uiView, RoomContext context)
+        public RoomPresenter(RoomUIView uiView, NetworkServiceContext context)
         {
             _uiView = uiView;
             _context = context;

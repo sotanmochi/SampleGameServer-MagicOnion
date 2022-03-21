@@ -90,6 +90,7 @@ namespace SampleGame.Gateway
         public async UniTask<bool> Join(string roomId, string username)
         {
             // DebugLogger.Log($"[ChatSystemContext] Join | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+            if (!_connected) { await Connect(); }
             await _streamingClient.Join(roomId, username);
             await UniTask.WaitUntil(() => _joined); // ToDo: Cancellation
             return _joined;

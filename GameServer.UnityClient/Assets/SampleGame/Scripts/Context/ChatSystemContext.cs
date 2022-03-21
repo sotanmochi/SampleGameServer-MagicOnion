@@ -30,7 +30,6 @@ namespace SampleGame.Context
             _chatService.OnUserJoin += OnUserJoinEventHandler;
             _chatService.OnUserLeave += OnUserLeaveEventHandler;
             _chatService.OnReceiveMessage += OnReceiveMessageEventHandler;           
-            _chatService.Initialize();
         }
 
         public async UniTask Dispose()
@@ -41,27 +40,6 @@ namespace SampleGame.Context
             _chatService.OnUserJoin -= OnUserJoinEventHandler;
             _chatService.OnUserLeave -= OnUserLeaveEventHandler;
             _chatService.OnReceiveMessage -= OnReceiveMessageEventHandler;
-            await _chatService.Dispose();
-        }
-
-        public async UniTask<bool> Connect()
-        {
-            return await _chatService.Connect();
-        }
-
-        public async UniTask Disconnect()
-        {
-            await _chatService.Disconnect();
-        }
-
-        public async UniTask<bool> Join(string roomId, string username)
-        {
-            return await _chatService.Join(roomId, username);
-        }
-
-        public async UniTask Leave()
-        {
-            await _chatService.Leave();
         }
 
         public void SendMessage(string message)

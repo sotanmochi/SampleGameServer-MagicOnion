@@ -7,24 +7,18 @@ namespace SampleGame.Lifecycle.System
 {
     public class ChatSystemLifecycle : LifecycleBase
     {
-        [SerializeField] string _address = "http://localhost:5000";
-
-        private ChatServiceGateway _chatServiceGateway;
         private ChatSystemContext _systemContext;
 
         public override async UniTask InitializeAsync()
         {
-            _chatServiceGateway = new ChatServiceGateway(_address);
-            _chatServiceGateway.Initialize();
-
-            _systemContext = ServiceLocator.Register<ChatSystemContext>(new ChatSystemContext(_chatServiceGateway));
+            var chatServiceGateway = ServiceLocator.GetInstance<ChatServiceGateway>();
+            _systemContext = ServiceLocator.Register<ChatSystemContext>(new ChatSystemContext(chatServiceGateway));
             _systemContext.Initialize();
         }
 
         public override async UniTask DisposeAsync()
         {
             await _systemContext.Dispose();
-            await _chatServiceGateway.Dispose();
         }
     }
 }

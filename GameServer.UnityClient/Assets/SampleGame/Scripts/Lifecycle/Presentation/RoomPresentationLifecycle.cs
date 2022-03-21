@@ -13,7 +13,7 @@ namespace SampleGame.Lifecycle.Presentation
 
         public override async UniTask InitializeAsync()
         {
-            var context = ServiceLocator.GetInstance<RoomContext>();
+            var context = ServiceLocator.GetInstance<NetworkServiceContext>();
             _presenter = new RoomPresenter(_uiView, context);
             _presenter.Initialize();
         }
