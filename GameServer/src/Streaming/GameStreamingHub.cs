@@ -16,9 +16,13 @@ namespace GameServer.Streaming
         private string _username;
         private int _clientId = -1;
 
-        public async Task SendPlayerPoseAsync(PlayerPose pose)
+        public async Task SendPlayerPoseAsync(PlayerPoseObject value)
         {
-            // ToDo
+            if (_clientId < 0) { return; }
+
+            // Console.WriteLine($"[GameStreamingHub.SendPlayerPoseAsync] Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+
+            Broadcast(_room).OnReceivePlayerPose(value);
         }
 
         public async Task JoinAsync(JoinRequest request)

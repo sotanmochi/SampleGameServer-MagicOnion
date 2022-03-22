@@ -4,7 +4,7 @@ using UnityEngine;
 namespace GameServer.Shared.MessagePackObject
 {
     [MessagePackObject]
-    public class PlayerPose
+    public class PlayerPoseObject
     {
         [Key(0)]
         public ushort PlayerId;

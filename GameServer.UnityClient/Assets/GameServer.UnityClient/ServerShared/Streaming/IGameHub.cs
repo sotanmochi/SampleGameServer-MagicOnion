@@ -9,7 +9,7 @@ namespace GameServer.Shared.Streaming
     /// </summary>
     public interface IGameHub : IStreamingHub<IGameHub, IGameHubReceiver>
     {
-        Task SendPlayerPoseAsync(PlayerPose pose);
+        Task SendPlayerPoseAsync(PlayerPoseObject value);
         Task JoinAsync(JoinRequest request);
         Task LeaveAsync();
     }

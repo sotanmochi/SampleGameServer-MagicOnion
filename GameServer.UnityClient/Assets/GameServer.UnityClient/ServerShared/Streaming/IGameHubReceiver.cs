@@ -7,7 +7,7 @@ namespace GameServer.Shared.Streaming
     /// </summary>
     public interface IGameHubReceiver
     {
-        void OnReceivePlayerPose(PlayerPose pose);
+        void OnReceivePlayerPose(PlayerPoseObject value);
         void OnJoin(JoinResponse response);
         void OnLeave(JoinResponse response);
         void OnUserJoin(JoinResponse response);

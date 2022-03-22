@@ -13,7 +13,7 @@ namespace GameServer.UnityClient
         public event Action<JoinResponse> OnLeave;
         public event Action<JoinResponse> OnUserJoin;
         public event Action<JoinResponse> OnUserLeave;
-        public event Action<PlayerPose> OnReceivePlayerPose;
+        public event Action<PlayerPoseObject> OnReceivePlayerPose;
 
         public async Task Join(string roomId, string username)
         {
@@ -39,7 +39,7 @@ namespace GameServer.UnityClient
             await _streamingClient.LeaveAsync();
         }
 
-        public void SendPlayerPose(ref PlayerPose pose)
+        public void SendPlayerPose(PlayerPoseObject value)
         {
             if (!Connected)
             {
@@ -48,7 +48,7 @@ namespace GameServer.UnityClient
             }
 
             DebugLogger.Log($"[GameStreamingClient] SendEvent | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            _streamingClient.SendPlayerPoseAsync(pose);
+            _streamingClient.SendPlayerPoseAsync(value);
         }
 
         protected override async Task ConnectClientAsync()
@@ -58,10 +58,10 @@ namespace GameServer.UnityClient
                                                         cancellationToken: _shutdownCancellation.Token);
         }
 
-        void IGameHubReceiver.OnReceivePlayerPose(PlayerPose pose)
+        void IGameHubReceiver.OnReceivePlayerPose(PlayerPoseObject value)
         {
             DebugLogger.Log($"[GameStreamingClient] OnReceivePlayerPose | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            // OnReceivePlayerPose?.Invoke((Pose.PlayerId, Pose.Position, Pose.RotationAngles));
+            OnReceivePlayerPose?.Invoke(value);
         }
 
         void IGameHubReceiver.OnJoin(JoinResponse response)
