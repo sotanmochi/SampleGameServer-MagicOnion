@@ -6,10 +6,11 @@ using Grpc.Core;
 using MagicOnion;
 using GameServer.UnityClient;
 using GameServer.Shared.MessagePackObject;
+using SampleGame.Domain.Player;
 
 namespace SampleGame.Gateway
 {
-    public sealed class MultiplayerServiceGateway
+    public sealed class MultiplayerServiceGateway : IMultiplayerServiceGateway
     {
         // public event Action<PlayerPose> OnReceivePlayerPose;
 
@@ -40,7 +41,7 @@ namespace SampleGame.Gateway
                 return;
             }
 
-            _streamingClient.OnReceivePlayerPose += OnReceivePlayerPoseEventHandler;
+            // _streamingClient.OnReceivePlayerPose += OnReceivePlayerPoseEventHandler;
             _streamingClient.OnJoin += OnJoinEventHandler;
             _streamingClient.OnLeave += OnLeaveEventHandler;
             _streamingClient.OnUserJoin += OnUserJoinEventHandler;
@@ -55,7 +56,7 @@ namespace SampleGame.Gateway
         {
             _initialized = false;
 
-            _streamingClient.OnReceivePlayerPose -= OnReceivePlayerPoseEventHandler;
+            // _streamingClient.OnReceivePlayerPose -= OnReceivePlayerPoseEventHandler;
             _streamingClient.OnJoin -= OnJoinEventHandler;
             _streamingClient.OnLeave -= OnLeaveEventHandler;
             _streamingClient.OnUserJoin -= OnUserJoinEventHandler;
@@ -101,10 +102,10 @@ namespace SampleGame.Gateway
             await _streamingClient.Leave();
         }
 
-        private void OnReceivePlayerPoseEventHandler(PlayerPose pose)
-        {
+        // private void OnReceivePlayerPoseEventHandler(PlayerPose pose)
+        // {
 
-        }
+        // }
 
         private void OnJoinEventHandler(JoinResponse joinResponse)
         {

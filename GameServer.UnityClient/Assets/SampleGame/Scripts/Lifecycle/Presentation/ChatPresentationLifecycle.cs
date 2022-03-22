@@ -1,6 +1,6 @@
 using UnityEngine;
 using Cysharp.Threading.Tasks;
-using SampleGame.Context;
+using SampleGame.Domain.Chat;
 using SampleGame.Presenter;
 using SampleGame.UIView;
 
@@ -13,8 +13,8 @@ namespace SampleGame.Lifecycle.Presentation
 
         public override async UniTask InitializeAsync()
         {
-            var context = ServiceLocator.GetInstance<ChatSystemContext>();
-            _presenter = new ChatPresenter(_uiView, context);
+            var system = ServiceLocator.GetInstance<ChatSystem>();
+            _presenter = new ChatPresenter(_uiView, system);
             _presenter.Initialize();
         }
 

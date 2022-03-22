@@ -1,6 +1,7 @@
 using System.Threading;
 using UniRx;
 using SampleGame.Context;
+using SampleGame.Domain.Chat;
 using SampleGame.UIView;
 using SampleGame.Utility;
 
@@ -9,15 +10,15 @@ namespace SampleGame.Presenter
     public sealed class ChatPresenter
     {
         private ChatMessageUIView _uiView;
-        private ChatSystemContext _context;
+        private ChatSystem _system;
 
         private bool _initialized;
         private readonly CompositeDisposable _disposable = new CompositeDisposable();
 
-        public ChatPresenter(ChatMessageUIView uiView, ChatSystemContext context)
+        public ChatPresenter(ChatMessageUIView uiView, ChatSystem system)
         {
             _uiView = uiView;
-            _context = context;
+            _system = system;
         }
 
         public void Initialize()
@@ -28,11 +29,11 @@ namespace SampleGame.Presenter
                 .Subscribe(message => 
                 {
                     // DebugLogger.Log($"[ChatPresenter] OnTriggerSendingMessage | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-                    _context.SendMessage(message);
+                    _system.SendMessage(message);
                 })
                 .AddTo(_disposable);
 
-            _context.OnReceiveMessage
+            _system.OnReceiveMessage
                 .ObserveOnMainThread()
                 .Subscribe(data => 
                 {

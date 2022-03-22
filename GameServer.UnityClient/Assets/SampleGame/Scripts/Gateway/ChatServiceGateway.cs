@@ -9,7 +9,7 @@ using SampleGame.Domain.Chat;
 
 namespace SampleGame.Gateway
 {
-    public sealed class ChatServiceGateway
+    public sealed class ChatServiceGateway : IChatServiceGateway
     {
         public event Action<ChatMessage> OnReceiveMessage;
 

@@ -1,50 +1,40 @@
 using System;
-using System.Threading;
-using Cysharp.Threading.Tasks;
 using UniRx;
-using SampleGame.Domain.Chat;
-using SampleGame.Gateway;
-using SampleGame.Utility;
 
-namespace SampleGame.Context
+namespace SampleGame.Domain.Chat
 {
-    public sealed class ChatSystemContext
+    public sealed class ChatSystem
     {
         public IObservable<ChatMessage> OnReceiveMessage => _receiveMessageSubject;
         private readonly Subject<ChatMessage> _receiveMessageSubject = new Subject<ChatMessage>();
 
-        private string _username;
+        private string _username = "_";
 
-        private readonly ChatServiceGateway _chatService;
+        private readonly IChatServiceGateway _serviceGateway;
 
-        public ChatSystemContext(ChatServiceGateway chatService)
+        public ChatSystem(IChatServiceGateway serviceGateway)
         {
-            _chatService = chatService;
+            _serviceGateway = serviceGateway;
+
+            _serviceGateway.OnReceiveMessage += OnReceiveMessageEventHandler;
+            _serviceGateway.OnJoin += OnJoinEventHandler;
+            _serviceGateway.OnLeave += OnLeaveEventHandler;
+            _serviceGateway.OnUserJoin += OnUserJoinEventHandler;
+            _serviceGateway.OnUserLeave += OnUserLeaveEventHandler;
         }
 
-        public void Initialize()
+        public void Dispose()
         {
-            _chatService.OnJoin += OnJoinEventHandler;
-            _chatService.OnLeave += OnLeaveEventHandler;
-            _chatService.OnUserJoin += OnUserJoinEventHandler;
-            _chatService.OnUserLeave += OnUserLeaveEventHandler;
-            _chatService.OnReceiveMessage += OnReceiveMessageEventHandler;           
-        }
-
-        public async UniTask Dispose()
-        {
-            _receiveMessageSubject.Dispose();
-            _chatService.OnJoin -= OnJoinEventHandler;
-            _chatService.OnLeave -= OnLeaveEventHandler;
-            _chatService.OnUserJoin -= OnUserJoinEventHandler;
-            _chatService.OnUserLeave -= OnUserLeaveEventHandler;
-            _chatService.OnReceiveMessage -= OnReceiveMessageEventHandler;
+            _serviceGateway.OnReceiveMessage -= OnReceiveMessageEventHandler;
+            _serviceGateway.OnJoin -= OnJoinEventHandler;
+            _serviceGateway.OnLeave -= OnLeaveEventHandler;
+            _serviceGateway.OnUserJoin -= OnUserJoinEventHandler;
+            _serviceGateway.OnUserLeave -= OnUserLeaveEventHandler;
         }
 
         public void SendMessage(string message)
         {
-            DebugLogger.Log($"[ChatSystemContext] SendMessage | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            _chatService.SendMessage(message);
+            _serviceGateway.SendMessage(message);
         }
 
         private void OnReceiveMessageEventHandler(ChatMessage message)
@@ -66,6 +56,7 @@ namespace SampleGame.Context
         private void OnLeaveEventHandler(JoinResult joinResult)
         {
             // DebugLogger.Log($"[ChatSystemContext] OnLeaveEventHandler | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+            _username = "_";
             _receiveMessageSubject.OnNext(new ChatMessage()
             { 
                 Message = $"{_username} has been left the room.",
