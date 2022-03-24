@@ -1,13 +1,13 @@
+using System;
 using System.Threading;
 using UniRx;
-using SampleGame.Context;
 using SampleGame.Domain.Chat;
 using SampleGame.UIView;
 using SampleGame.Utility;
 
 namespace SampleGame.Presenter
 {
-    public sealed class ChatPresenter
+    public sealed class ChatPresenter : IDisposable
     {
         private ChatMessageUIView _uiView;
         private ChatSystem _system;
@@ -19,6 +19,7 @@ namespace SampleGame.Presenter
         {
             _uiView = uiView;
             _system = system;
+            Initialize();
         }
 
         public void Initialize()

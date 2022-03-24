@@ -12,8 +12,7 @@ namespace SampleGame.Gateway
 {
     public sealed class MultiplayerServiceGateway : IMultiplayerServiceGateway
     {
-        // public event Action<PlayerPose> OnReceivePlayerPose;
-
+        public event Action<PlayerPose> OnPlayerPoseReceive;
         public event Action<JoinResult> OnJoin;
         public event Action<JoinResult> OnLeave;
         public event Action<JoinResult> OnUserJoin;
@@ -26,10 +25,10 @@ namespace SampleGame.Gateway
         private readonly GameStreamingClient _streamingClient;
         private readonly ChannelBase _channel;
 
-        public MultiplayerServiceGateway(string address = "http://localhost:5000")
+        public MultiplayerServiceGateway(MultiplayerServiceConfiguration configuration)
         {
             _streamingClient = new GameStreamingClient();
-            _channel = GrpcChannelx.ForAddress(address);
+            _channel = GrpcChannelx.ForAddress(configuration.Address);
             Initialize();
         }
 
@@ -41,7 +40,7 @@ namespace SampleGame.Gateway
                 return;
             }
 
-            // _streamingClient.OnReceivePlayerPose += OnReceivePlayerPoseEventHandler;
+            _streamingClient.OnReceivePlayerPose += OnPlayerPoseReceiveEventHandler;
             _streamingClient.OnJoin += OnJoinEventHandler;
             _streamingClient.OnLeave += OnLeaveEventHandler;
             _streamingClient.OnUserJoin += OnUserJoinEventHandler;
@@ -56,7 +55,7 @@ namespace SampleGame.Gateway
         {
             _initialized = false;
 
-            // _streamingClient.OnReceivePlayerPose -= OnReceivePlayerPoseEventHandler;
+            _streamingClient.OnReceivePlayerPose -= OnPlayerPoseReceiveEventHandler;
             _streamingClient.OnJoin -= OnJoinEventHandler;
             _streamingClient.OnLeave -= OnLeaveEventHandler;
             _streamingClient.OnUserJoin -= OnUserJoinEventHandler;
@@ -102,10 +101,27 @@ namespace SampleGame.Gateway
             await _streamingClient.Leave();
         }
 
-        // private void OnReceivePlayerPoseEventHandler(PlayerPose pose)
-        // {
+        public void SendPlayerPose(PlayerPose value)
+        {
+            _streamingClient.SendPlayerPose(new PlayerPoseObject()
+            {
+                PlayerId = value.PlayerId,
+                Position = value.Position,
+                Rotation = value.Rotation,
+            });
+        }
 
-        // }
+        private void OnPlayerPoseReceiveEventHandler(PlayerPoseObject pose)
+        {
+            // DebugLogger.Log($"[{nameof(MultiplayerServiceGateway)}] OnReceivePlayerPoseEventHandler | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
+
+            OnPlayerPoseReceive?.Invoke(new PlayerPose()
+            {
+                PlayerId = pose.PlayerId,
+                Position = pose.Position,
+                Rotation = pose.Rotation,
+            });
+        }
 
         private void OnJoinEventHandler(JoinResponse joinResponse)
         {

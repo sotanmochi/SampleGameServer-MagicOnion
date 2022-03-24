@@ -1,4 +1,4 @@
-using System.Threading;
+using System;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using SampleGame.Context;
@@ -7,7 +7,7 @@ using SampleGame.Utility;
 
 namespace SampleGame.Presenter
 {
-    public sealed class RoomPresenter
+    public sealed class RoomPresenter : IDisposable
     {
         private RoomUIView _uiView;
         private NetworkServiceContext _context;
@@ -19,6 +19,7 @@ namespace SampleGame.Presenter
         {
             _uiView = uiView;
             _context = context;
+            Initialize();
         }
 
         public void Initialize()

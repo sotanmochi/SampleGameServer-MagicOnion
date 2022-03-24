@@ -4,6 +4,8 @@ namespace SampleGame.Domain.Player
 {
     public interface IMultiplayerServiceGateway
     {
+        void SendPlayerPose(PlayerPose value);
+        event Action<PlayerPose> OnPlayerPoseReceive;
         event Action<JoinResult> OnJoin;
         event Action<JoinResult> OnLeave;
         event Action<JoinResult> OnUserJoin;

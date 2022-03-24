@@ -385,9 +385,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 268621905}
-  - component: {fileID: 268621907}
-  - component: {fileID: 268621906}
-  - component: {fileID: 268621908}
+  - component: {fileID: 268621909}
+  - component: {fileID: 268621910}
   m_Layer: 0
   m_Name: Lifecycle
   m_TagString: Untagged
@@ -410,7 +409,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &268621906
+--- !u!114 &268621909
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -419,11 +418,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 268621904}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51a2db8ff7da0c048a8e42977507ab5d, type: 3}
+  m_Script: {fileID: 11500000, guid: 9ed50d49090f7a24d8c0292a58824474, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  parentReference:
+    TypeName: SampleGame.Application.Lifecycle.MainLifecycle
+  autoRun: 1
+  autoInjectGameObjects: []
   _uiView: {fileID: 883505605}
---- !u!114 &268621907
+--- !u!114 &268621910
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -432,24 +435,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 268621904}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b59d778387ea6ab4c97071b96da0112e, type: 3}
+  m_Script: {fileID: 11500000, guid: 58f68420c2abecd489581c2a55f8d814, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _lifecycles:
-  - {fileID: 268621906}
-  - {fileID: 268621908}
---- !u!114 &268621908
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 268621904}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19583c58221cb2c43adf89ddab23b04c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  parentReference:
+    TypeName: SampleGame.Application.Lifecycle.MainLifecycle
+  autoRun: 1
+  autoInjectGameObjects: []
   _uiView: {fileID: 883505606}
 --- !u!1 &296051415
 GameObject:

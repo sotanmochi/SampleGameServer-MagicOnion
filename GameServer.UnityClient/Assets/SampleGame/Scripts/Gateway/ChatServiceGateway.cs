@@ -25,10 +25,11 @@ namespace SampleGame.Gateway
         private readonly ChatStreamingClient _streamingClient;
         private readonly ChannelBase _channel;
 
-        public ChatServiceGateway(string address = "http://localhost:5000")
+        public ChatServiceGateway(ChatServiceConfiguration configuration)
         {
             _streamingClient = new ChatStreamingClient();
-            _channel = GrpcChannelx.ForAddress(address);
+            _channel = GrpcChannelx.ForAddress(configuration.Address);
+            Initialize();
         }
 
         public void Initialize()
