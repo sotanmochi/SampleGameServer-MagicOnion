@@ -37,9 +37,6 @@ namespace SampleGame.Application.Lifecycle
 
         private void RegisterServices(IContainerBuilder builder)
         {
-            builder.Register<CameraContext>(Lifetime.Singleton);
-            builder.Register<NetworkServiceContext>(Lifetime.Singleton);
-
             builder.Register<CameraSystem>(Lifetime.Singleton);
             builder.Register<ChatSystem>(Lifetime.Singleton);
             builder.Register<PlayerSpawnSystem>(Lifetime.Singleton);

@@ -4,6 +4,7 @@ using VContainer.Unity;
 using Cinemachine;
 using SampleGame.Context;
 using SampleGame.Domain.Camera;
+using SampleGame.Domain.Player;
 
 namespace SampleGame.Application.Lifecycle
 {
@@ -11,23 +12,28 @@ namespace SampleGame.Application.Lifecycle
     {
         [SerializeField] CinemachineVirtualCamera _mainCamera;
 
-        private CameraSystem _system;
         private CameraContext _context;
+        private CameraSystem _cameraSystem;
 
         protected override void Awake()
         {
             base.Awake();
 
-            _system = Container.Resolve<CameraSystem>();
-            _system.SetMainCamera(_mainCamera);
-            
-            _context = Container.Resolve<CameraContext>();
+            var playerSpawnSystem = Container.Resolve<PlayerSpawnSystem>();
+
+            _cameraSystem = Container.Resolve<CameraSystem>();
+            _cameraSystem.SetMainCamera(_mainCamera);
+
+            _context = new CameraContext(_cameraSystem, playerSpawnSystem);
         }
 
         protected override void OnDestroy()
         {
-            _system.SetMainCamera(null);
-            _system = null;
+            _context.Dispose();
+            _context = null;
+
+            _cameraSystem.SetMainCamera(null);
+            _cameraSystem = null;
 
             base.OnDestroy();
         }
