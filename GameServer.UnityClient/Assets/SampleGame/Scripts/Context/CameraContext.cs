@@ -26,12 +26,18 @@ namespace SampleGame.Context
 
         private void OnPlayerSpawnEventHandler(PlayerComponent player)
         {
-            _cameraSystem.SetCameraTarget(player.Transform);
+            if (player.IsLocalPlayer)
+            {
+                _cameraSystem.SetCameraTarget(player.Transform);
+            }
         }
 
         private void OnPlayerDespawnEventHandler(ushort playerId)
         {
-            _cameraSystem.SetCameraTarget(null);
+            if (_playerSystem.LocalPlayerId == playerId)
+            {
+                _cameraSystem.SetCameraTarget(null);
+            }
         }
     }
 }
