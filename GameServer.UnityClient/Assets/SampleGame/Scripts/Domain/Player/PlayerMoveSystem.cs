@@ -9,6 +9,8 @@ namespace SampleGame.Domain.Player
     {
         public PlayerMoveComponent LocalPlayer { get; private set; }
 
+        private PlayerPose _localPlayerPose = new PlayerPose();
+
         private readonly ConcurrentQueue<PlayerPose> _poseUpdateEventQueue = new ConcurrentQueue<PlayerPose>();
         private readonly InMemoryStorage<PlayerComponent> _storage;
 
@@ -69,6 +71,7 @@ namespace SampleGame.Domain.Player
         {
             if (LocalPlayer is null) { return; }
             LocalPlayer.Move(forward, right);
+            UpdateLocalPlayer(LocalPlayer.Transform.position, LocalPlayer.Transform.rotation);
         }
 
         /// <summary>
@@ -77,12 +80,10 @@ namespace SampleGame.Domain.Player
         /// <param name="value"></param>
         public void UpdateLocalPlayer(Vector3 position, Quaternion rotation)
         {
-            Enqueue(new PlayerPose()
-            {
-                PlayerId = (ushort)_spawnSystem.LocalPlayerId,
-                Position = position,
-                Rotation = rotation,
-            });
+            _localPlayerPose.PlayerId = (ushort)_spawnSystem.LocalPlayerId;
+            _localPlayerPose.Position = position;
+            _localPlayerPose.Rotation = rotation;
+            Enqueue(_localPlayerPose);
         }
 
         /// <summary>
