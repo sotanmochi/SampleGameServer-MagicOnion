@@ -22,7 +22,7 @@ namespace GameServer.Streaming
 
             // Console.WriteLine($"[GameStreamingHub.SendPlayerPoseAsync] Thread Id: {Thread.CurrentThread.ManagedThreadId}");
 
-            Broadcast(_room).OnReceivePlayerPose(value);
+            BroadcastExceptSelf(_room).OnReceivePlayerPose(value);
         }
 
         public async Task JoinAsync(JoinRequest request)
