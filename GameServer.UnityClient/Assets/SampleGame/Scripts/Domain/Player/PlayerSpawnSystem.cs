@@ -15,6 +15,9 @@ namespace SampleGame.Domain.Player
         public int LocalPlayerId => _localPlayerId;
         private int _localPlayerId;
 
+        public PlayerComponent LocalPlayer => _localPlayer;
+        private PlayerComponent _localPlayer;
+
         private PlayerComponent _prefab;
         private Transform _parent;
 
@@ -63,6 +66,7 @@ namespace SampleGame.Domain.Player
                 {
                     player = GameObject.Instantiate<PlayerComponent>(_prefab, Vector3.zero, Quaternion.identity, _parent);
                     player.PlayerId = id;
+                    player.IsLocalPlayer = isLocalPlayer;
                     Storage.TryAdd(id, player);
                 }
                 else
@@ -73,6 +77,7 @@ namespace SampleGame.Domain.Player
                 if (isLocalPlayer)
                 {
                     _localPlayerId = id;
+                    _localPlayer = player;
                 }
 
                 DebugLogger.Log($"[{nameof(PlayerSpawnSystem)}] Player[{id}]: {player.name}");
@@ -90,17 +95,17 @@ namespace SampleGame.Domain.Player
             await UniTask.SwitchToMainThread();
             DebugLogger.Log($"[{nameof(PlayerSpawnSystem)}] Despawn | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
 
-            if (Storage.TryRemove(id, out var player))
-            {
-                GameObject.Destroy(player);
-            }
-
             if (id == _localPlayerId)
             {
                 _localPlayerId = -1;
             }
 
             OnDespawn?.Invoke(id);
+
+            if (Storage.TryRemove(id, out var player))
+            {
+                GameObject.Destroy(player);
+            }
         }
 
         private void OnJoinEventHandler(JoinResult joinResult)

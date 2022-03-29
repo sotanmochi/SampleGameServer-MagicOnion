@@ -387,6 +387,7 @@ GameObject:
   - component: {fileID: 268621905}
   - component: {fileID: 268621909}
   - component: {fileID: 268621910}
+  - component: {fileID: 268621911}
   m_Layer: 0
   m_Name: Lifecycle
   m_TagString: Untagged
@@ -443,6 +444,22 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   _uiView: {fileID: 883505606}
+--- !u!114 &268621911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268621904}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b3e532b1380d0846b548328009c4652, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parentReference:
+    TypeName: SampleGame.Application.Lifecycle.MainLifecycle
+  autoRun: 1
+  autoInjectGameObjects: []
 --- !u!1 &296051415
 GameObject:
   m_ObjectHideFlags: 0

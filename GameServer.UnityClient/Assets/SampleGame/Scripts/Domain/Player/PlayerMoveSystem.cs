@@ -6,7 +6,9 @@ using SampleGame.Utility;
 namespace SampleGame.Domain.Player
 {
     public sealed class PlayerMoveSystem : IDisposable
-    {        
+    {
+        public PlayerMoveComponent LocalPlayer { get; private set; }
+
         private readonly ConcurrentQueue<PlayerPose> _poseUpdateEventQueue = new ConcurrentQueue<PlayerPose>();
         private readonly InMemoryStorage<PlayerComponent> _storage;
 
@@ -24,11 +26,15 @@ namespace SampleGame.Domain.Player
 
             _storage = spawnSystem.Storage;
 
+            _spawnSystem.OnSpawn += OnPlayerSpawnEventHandler;
+            _spawnSystem.OnDespawn += OnPlayerDespawnEventHandler;
             _serviceGateway.OnPlayerPoseReceive += OnPlayerPoseReceive;
         }
 
         public void Dispose()
         {
+            _spawnSystem.OnSpawn -= OnPlayerSpawnEventHandler;
+            _spawnSystem.OnDespawn -= OnPlayerDespawnEventHandler;
             _serviceGateway.OnPlayerPoseReceive -= OnPlayerPoseReceive;            
         }
 
@@ -59,6 +65,12 @@ namespace SampleGame.Domain.Player
             }
         }
 
+        public void MoveLocalPlayer(float forward, float right)
+        {
+            if (LocalPlayer is null) { return; }
+            LocalPlayer.Move(forward, right);
+        }
+
         /// <summary>
         /// Runs on background thread or main thread
         /// </summary>
@@ -81,6 +93,22 @@ namespace SampleGame.Domain.Player
         {
             value.PlayerId = (ushort)_spawnSystem.LocalPlayerId;
             Enqueue(value);
+        }
+
+        private void OnPlayerSpawnEventHandler(PlayerComponent player)
+        {
+            if (player.IsLocalPlayer)
+            {
+                LocalPlayer = player.gameObject.AddComponent<PlayerMoveComponent>();
+            }
+        }
+
+        private void OnPlayerDespawnEventHandler(ushort playerId)
+        {
+            if (playerId == LocalPlayer.PlayerId)
+            {
+                LocalPlayer = null;
+            }
         }
 
         /// <summary>
