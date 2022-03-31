@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cysharp.Threading;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
@@ -23,8 +24,14 @@ namespace GameServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // MagicOnion
             services.AddGrpc(); // MagicOnion depends on ASP.NET Core gRPC service.
             services.AddMagicOnion();
+
+            // LogicLooper
+            var targetFrameRate = 10;
+            services.AddSingleton<ILogicLooperPool>(_ => new LogicLooperPool(targetFrameRate, Environment.ProcessorCount, RoundRobinLogicLooperPoolBalancer.Instance));
+            services.AddHostedService<LoopHostedService>();
 
             // ToDo:
             // services.AddRedisRepository(options => 
