@@ -31,7 +31,7 @@ namespace GameServer
             // LogicLooper
             var targetFrameRate = 10;
             services.AddSingleton<ILogicLooperPool>(_ => new LogicLooperPool(targetFrameRate, Environment.ProcessorCount, RoundRobinLogicLooperPoolBalancer.Instance));
-            services.AddHostedService<LoopHostedService>();
+            services.AddHostedService<GameLoopHostedService>();
 
             // ToDo:
             // services.AddRedisRepository(options => 
