@@ -11,7 +11,7 @@
   This library is licensed under the MIT License.  
   Copyright (c) 2017 Yoshifumi Kawai and contributors  
 
-- [LogicLooper 1.1.0](https://github.com/Cysharp/LogicLooper/releases/tag/1.1.0)
+- [LogicLooper 1.1.0](https://github.com/Cysharp/LogicLooper/releases/tag/1.1.0)  
   This library is licensed under the MIT License.  
   Copyright (c) 2020 Cysharp, Inc.
 
