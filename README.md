@@ -24,6 +24,10 @@ The following assets are included in this project.
 
 ## Dependencies
 
+- [LogicLooper 1.1.0](https://github.com/Cysharp/LogicLooper/releases/tag/1.1.0)
+  This library is licensed under the MIT License.  
+  Copyright (c) 2020 Cysharp, Inc.
+
 - [StackExchange.Redis 2.2.88](https://github.com/StackExchange/StackExchange.Redis)  
   This library is licensed under the MIT License.  
   Copyright (c) 2014 Stack Exchange  
