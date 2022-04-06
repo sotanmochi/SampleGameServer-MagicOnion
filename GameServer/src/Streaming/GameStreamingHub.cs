@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MagicOnion.Server.Hubs;
 using GameServer.Shared.MessagePackObject;
 using GameServer.Shared.Streaming;
@@ -7,14 +8,22 @@ using GameServer.Shared.Streaming;
 namespace GameServer.Streaming
 {
     /// <summary>
-    /// Game server processing.
-    /// One class instance for one connection.
+    /// Game server processing. One class instance for one connection.
     /// </summary>
-    public sealed class GameStreamingHub : StreamingHubBase<IGameHub, IGameHubReceiver>, IGameHub
+    public sealed partial class GameStreamingHub : StreamingHubBase<IGameHub, IGameHubReceiver>, IGameHub
     {
+        private readonly IGameLoopService _gameLoopService;
+        private readonly ILogger _logger;
+
         private IGroup _room;
-        private string _username;
         private int _clientId = -1;
+        private string _username = "";
+
+        public GameStreamingHub(IGameLoopService gameLoopHostedService, ILogger<GameStreamingHub> logger)
+        {
+            _gameLoopService = gameLoopHostedService;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
 
         public async Task SendPlayerPoseAsync(PlayerPoseObject value)
         {
@@ -27,55 +36,56 @@ namespace GameServer.Streaming
 
         public async Task JoinAsync(JoinRequest request)
         {
-            if (_clientId >= 0 && request.RoomId == _room?.GroupName) { return; }
+            var roomId = $"GameStreaming_{request.RoomId}";
+
+            if (_clientId >= 0 && roomId == _room?.GroupName) { return; }
 
             // Console.WriteLine($"[{nameof(GameStreamingHub)}] JoinAsync | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
 
-            var roomId = $"GameStreaming_{request.RoomId}";
-            ClientIdPoolStorage.CreateOrGetPool(roomId, 10);
+            _room = await Group.AddAsync(roomId);
 
-            var newClientId = ClientIdPoolStorage.GetClientId(roomId);
-            // Console.WriteLine($"[{nameof(GameStreamingHub)}] JoinAsync | ClientId: {newClientId}");
-            if (newClientId < 0)
+            var response = new JoinResponse()
             {
-                var failedResponse = new JoinResponse()
-                {
-                    ClientId = _clientId,
-                    ConnectionId = Context.ContextId.ToString(),
-                    RoomId = roomId,
-                    Username = request.Username,
-                };
+                ClientId = -1,
+                ConnectionId = Context.ContextId.ToString(),
+                RoomId = roomId,
+                Username = request.Username,
+            };
 
-                _room = await Group.AddAsync(roomId);
-                BroadcastToSelf(_room).OnLeave(failedResponse);
+            if (!_gameLoopService.TryGetGameLoop(roomId, out var gameLoop))
+            {
+                _logger.LogInformation($"Could not get a game loop for '{roomId}'.");
+                BroadcastToSelf(_room).OnLeave(response);
                 await _room.RemoveAsync(Context);
-
                 return;
             }
 
-            _room = await Group.AddAsync(roomId);
-            _username = request.Username;
+            var newClientId = ClientIdPoolStorage.GetClientId(roomId);
+            if (newClientId < 0)
+            {
+                _logger.LogInformation($"Could not get a client id.");
+                BroadcastToSelf(_room).OnLeave(response);
+                await _room.RemoveAsync(Context);
+                return;
+            }
+
             _clientId = newClientId;
+            _username = request.Username;
 
             Console.WriteLine($"[{nameof(GameStreamingHub)}] JoinAsync | Room: {_room.GroupName}, ClientId: {_clientId}, Username: {_username}, ContextId: {Context.ContextId})");
 
-            var successResponse = new JoinResponse()
-            {
-                ClientId = _clientId,
-                ConnectionId = Context.ContextId.ToString(),
-                RoomId = _room.GroupName,
-                Username = _username,
-            };
+            response.ClientId = _clientId;
+            response.Username = _username;
 
             Console.WriteLine($"[{nameof(GameStreamingHub)}] Join success: {_clientId}");
 
-            BroadcastToSelf(_room).OnJoin(successResponse);
-            BroadcastExceptSelf(_room).OnUserJoin(successResponse);
+            BroadcastToSelf(_room).OnJoin(response);
+            BroadcastExceptSelf(_room).OnUserJoin(response);
         }
 
         public async Task LeaveAsync()
         {
-            if (_clientId < 0) { return; }
+            if (_clientId < 0 || _room is null) { return; }
 
             // Console.WriteLine($"[{nameof(GameStreamingHub)}] LeaveAsync | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
             Console.WriteLine($"[{nameof(GameStreamingHub)}] LeaveAsync | Room: {_room.GroupName}, No: {_clientId}, Username: {_username}, Context Id: {Context.ContextId})");
@@ -94,6 +104,11 @@ namespace GameServer.Streaming
 
             var memberCount = await _room.GetMemberCountAsync();
             Console.WriteLine($"[{nameof(GameStreamingHub)}] LeaveAsync | Member count: {memberCount}");
+
+            if (memberCount == 0)
+            {
+                _gameLoopService.ReleaseGameLoop(_room.GroupName);
+            }
 
             BroadcastToSelf(_room).OnLeave(response);
             BroadcastExceptSelf(_room).OnUserLeave(response);
