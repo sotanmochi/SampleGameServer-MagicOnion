@@ -7,69 +7,51 @@ using GameServer.Shared.Streaming;
 namespace GameServer.Streaming
 {
     /// <summary>
-    /// Chat server processing.
-    /// One class instance for one connection.
+    /// Chat server processing. One class instance for one connection.
     /// </summary>
     public sealed class ChatStreamingHub : StreamingHubBase<IChatHub, IChatHubReceiver>, IChatHub
     {
         private IGroup _room;
-        private string _username;
         private int _clientId = -1;
+        private string _username = "";
 
         public async Task JoinAsync(JoinRequest request)
         {
-            if (_clientId >= 0 && request.RoomId == _room?.GroupName) { return; }
-
-            // Console.WriteLine($"[ChatStreamingHub] JoinAsync | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-
             var roomId = $"ChatStreaming_{request.RoomId}";
-            ClientIdPoolStorage.CreateOrGetPool(roomId, 10);
+
+            if (_clientId >= 0 && roomId == _room?.GroupName) { return; }
+
+            _room = await Group.AddAsync(roomId);
+
+            var response = new JoinResponse()
+            {
+                ClientId = -1,
+                ConnectionId = Context.ContextId.ToString(),
+                RoomId = roomId,
+                Username = request.Username,
+            };
 
             var newClientId = ClientIdPoolStorage.GetClientId(roomId);
-            // Console.WriteLine($"[ChatStreamingHub] JoinAsync | ClientId: {newClientId}");
             if (newClientId < 0)
             {
-                var failedResponse = new JoinResponse()
-                {
-                    ClientId = _clientId,
-                    ConnectionId = Context.ContextId.ToString(),
-                    RoomId = roomId,
-                    Username = request.Username,
-                };
-
-                _room = await Group.AddAsync(roomId);
-                BroadcastToSelf(_room).OnLeave(failedResponse);
+                BroadcastToSelf(_room).OnLeave(response);
                 await _room.RemoveAsync(Context);
-
                 return;
             }
 
-            _room = await Group.AddAsync(request.RoomId);
-            _username = request.Username;
             _clientId = newClientId;
+            _username = request.Username;
 
-            // Console.WriteLine($"[ChatStreamingHub] JoinAsync | Room: {_room.GroupName}, ClientId: {_clientId}, Username: {_username}, ContextId: {Context.ContextId})");
+            response.ClientId = _clientId;
+            response.Username = _username;
 
-            var successResponse = new JoinResponse()
-            {
-                ClientId = _clientId,
-                ConnectionId = Context.ContextId.ToString(),
-                RoomId = _room.GroupName,
-                Username = _username,
-            };
-
-            // Console.WriteLine($"[ChatStreamingHub] Join success: {_clientId}");
-
-            BroadcastToSelf(_room).OnJoin(successResponse);
-            BroadcastExceptSelf(_room).OnUserJoin(successResponse);
+            BroadcastToSelf(_room).OnJoin(response);
+            BroadcastExceptSelf(_room).OnUserJoin(response);
         }
 
         public async Task LeaveAsync()
         {
             if (_clientId < 0) { return; }
-
-            // Console.WriteLine($"[ChatStreamingHub] LeaveAsync | Thread Id: {Thread.CurrentThread.ManagedThreadId}");
-            // Console.WriteLine($"[ChatStreamingHub] LeaveAsync | Room: {_room.GroupName}, No: {_clientId}, Username: {_username}, Context Id: {Context.ContextId})");
 
             var response = new JoinResponse()
             {
@@ -81,7 +63,9 @@ namespace GameServer.Streaming
 
             await _room.RemoveAsync(Context);
             ClientIdPoolStorage.ReturnToPool(_room.GroupName, (ushort)_clientId);
+
             _clientId = -1;
+            _username = "";
 
             // var memberCount = await _room.GetMemberCountAsync();
             // Console.WriteLine($"[ChatStreamingHub] LeaveAsync | Member count: {memberCount}");
