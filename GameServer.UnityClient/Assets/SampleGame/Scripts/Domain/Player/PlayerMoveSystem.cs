@@ -51,7 +51,7 @@ namespace SampleGame.Domain.Player
                 {
                     var playerId = value.PlayerId;
                     DebugLogger.Log($"[{nameof(PlayerMoveSystem)}] PoseUpdateEvent PlayerId: {playerId}");
-                    if (_storage.TryGetValue(playerId, out var player))
+                    if (_storage.TryGetValue(playerId, out var player) && player is not null)
                     {
                         if (playerId == _spawnSystem.LocalPlayerId)
                         {
